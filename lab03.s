@@ -56,7 +56,7 @@ image565:
     la   a0, image888
     la   a3, image565
     li   a1, 19 # width
-    li   a2,  6 # height
+    li   a2, 6 # height
     jal  ra, rgb888_to_rgb565
 
     addi a7, zero, 10 
@@ -98,9 +98,30 @@ outShowRowLoop:
 # ----------------------------------------
 
 rgb888_to_rgb565:
-# ----------------------------------------
-# Write your code here.
-# You may move the "return" instruction (jalr zero, ra, 0).
+    add t0, zero, zero    # row counter
+showRowLoop565:
+    bge t0, a2, outShowRowLoop565
+    add t1, zero, zero # column counter
+showColumnLoop565:
+    bge, t1, a1, outShowColumnLoop565
+    lbu t2, 0(a0)       # get red
+    lbu t3, 1(a0)       # get green
+    lbu t4, 2(a0)       # get blue
+    andi t2, t2, -8     # clear the 3 last bits for red
+    srli t2, t2, 3      # shift right 3 bits
+    andi t3, t3, -3     # clear the last 2 bits for green
+    srli t3, t3, 2      # shift right 2 bits
+    #andi t4, t4, -8    # clear the 3 last bits for blue
+    srli t4, t4, 3      # shift right 3 bits
+    or t4, t4, t3       # combine green and blue
+    or t4, t4, t2       # add red to the above
+    sh t2, 0(a3)        # let there be light at this pixel
+    addi a0, a0, 3      # move on to the next image pixel
+    addi a3, a3, 2      # move on to the next LED 
+    addi t1, t1, 1
+    j showColumnLoop565
+outShowColumnLoop565:
+    addi, t0, t0, 1
+    j showRowLoop565
+outShowRowLoop565:
     jalr zero, ra, 0
-
-
